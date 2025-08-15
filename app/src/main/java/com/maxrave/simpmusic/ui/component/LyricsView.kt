@@ -136,52 +136,32 @@ fun LyricsView(
     var currentLineIndex by rememberSaveable {
         mutableIntStateOf(-1)
     }
+    var isUserScrolling by remember { mutableStateOf(false) }
+
+    // LaunchedEffect to detect user scrolling
+    LaunchedEffect(listState.isScrollInProgress) {
+        isUserScrolling = listState.isScrollInProgress
+    }
+
+    // LaunchedEffect to update currentLineIndex
     LaunchedEffect(key1 = current) {
         val lines = lyricsData.lyrics.lines
         if (current.current > 0L) {
-            lines?.indices?.forEach { i ->
-                val sentence = lines[i]
-                val startTimeMs = sentence.startTimeMs.toLong()
-
-                // estimate the end time of the current sentence based on the start time of the next sentence
-                val endTimeMs =
-                    if (i < lines.size - 1) {
-                        lines[i + 1].startTimeMs.toLong()
-                    } else {
-                        // if this is the last sentence, set the end time to be some default value (e.g., 1 minute after the start time)
-                        startTimeMs + 60000
-                    }
-                if (current.current in startTimeMs..endTimeMs) {
-                    currentLineIndex = i
-                }
-            }
-            if (!lines.isNullOrEmpty() &&
-                (
-                    current.current in (
-                        0..(
-                            lines.getOrNull(0)?.startTimeMs
-                                ?: "0"
-                        ).toLong()
-                    )
-                )
-            ) {
-                currentLineIndex = -1
+            val nextLineIndex = lines?.indexOfFirst { it.startTimeMs.toLong() > current.current }
+            currentLineIndex = when {
+                nextLineIndex == 0 -> -1
+                nextLineIndex != null && nextLineIndex > 0 -> nextLineIndex - 1
+                else -> lines?.size?.minus(1) ?: -1
             }
         } else {
             currentLineIndex = -1
         }
     }
-    LaunchedEffect(key1 = currentLineIndex, key2 = currentLineHeight) {
-        if (currentLineIndex > -1 && currentLineHeight > 0 && lyricsData.lyrics.syncType == "LINE_SYNCED") {
-            val boxEnd = listState.layoutInfo.viewportEndOffset
-            val boxStart = listState.layoutInfo.viewportStartOffset
-            val viewPort = boxEnd - boxStart
-            val offset = viewPort / 2 - currentLineHeight / 2
-            Log.w(TAG, "Offset: $offset")
-            listState.animateScrollAndCentralizeItem(
-                index = currentLineIndex,
-                this,
-            )
+
+    // LaunchedEffect to handle automatic scrolling when a new line comes up
+    LaunchedEffect(key1 = currentLineIndex) {
+        if (!isUserScrolling && currentLineIndex > -1 && lyricsData.lyrics.syncType == "LINE_SYNCED") {
+            listState.animateScrollToItem(index = currentLineIndex)
         }
     }
 
