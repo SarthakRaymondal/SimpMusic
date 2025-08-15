@@ -158,7 +158,6 @@ import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.viewModel.LyricsProvider
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import com.maxrave.simpmusic.viewModel.UIEvent
-import com.moriatsushi.insetsx.statusBars
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.CupertinoMaterials
@@ -343,6 +342,9 @@ fun NowPlayingScreen(
         mutableStateOf(true)
     }
 
+    // THIS IS THE BLOCK OF CODE THAT WAS REMOVED.
+    // It used a delay(5000) to automatically hide the controls.
+    /*
     LaunchedEffect(key1 = showHideJob) {
         if (!showHideJob) {
             delay(5000)
@@ -371,6 +373,8 @@ fun NowPlayingScreen(
             showHideJob = false
         }
     }
+    */
+    // END OF REMOVED CODE
 
     LaunchedEffect(Unit) {
         snapshotFlow { mainScrollState.value }
