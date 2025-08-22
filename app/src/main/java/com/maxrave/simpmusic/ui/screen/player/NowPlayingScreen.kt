@@ -1905,10 +1905,10 @@ fun NowPlayingScreen(
                             }
                         }
                         Box(
-                            modifier =
-                                Modifier
-                                    .wrapContentSize(Alignment.Center)
-                                    .align(Alignment.BottomCenter),
+                            Modifier
+    .fillMaxHeight()
+    .wrapContentWidth(unbounded = true, align = Alignment.CenterHorizontally)
+    .align(Alignment.Center)
                         ) {
                             LinearProgressIndicator(
                                 progress = { timelineState.current.toFloat() / timelineState.total },
